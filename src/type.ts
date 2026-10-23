@@ -14,8 +14,17 @@ export type Cliente = {
     email: string;
 }
 
+
 export type Pedido = {
-    pedidoId: number;
-    data: Date;
-}
+  pedidoId: number;
+  clienteId: string;
+  data: Date;
+  itens: ItemCarrinho[];
+  total: number;
+};
+
+export type ItemCarrinho = {
+  produtoId: string;
+  quantidade: number;
+};
 
