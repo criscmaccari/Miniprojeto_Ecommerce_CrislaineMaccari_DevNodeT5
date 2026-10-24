@@ -1,26 +1,18 @@
+
 export type Categoria = "alimentos" | "vestuario";
 
 export type Produto = {
-    produtoId: string;
-    nome: string;
-    categoria: Categoria;
-    preco: number;
-    estoque: number;
-}
+  produtoId: string;
+  nome: string;
+  categoria: Categoria;
+  preco: number;
+  estoque: number;
+};
 
 export type Cliente = {
-    clienteId: string;
-    nome: string;
-    email: string;
-}
-
-
-export type Pedido = {
-  pedidoId: number;
   clienteId: string;
-  data: Date;
-  itens: ItemCarrinho[];
-  total: number;
+  nome: string;
+  email: string;
 };
 
 export type ItemCarrinho = {
@@ -28,3 +20,16 @@ export type ItemCarrinho = {
   quantidade: number;
 };
 
+export type ItemPedido = {
+  produtoId: string;
+  quantidade: number;
+  precoUnitario: number;
+};
+
+export type Pedido = {
+  pedidoId: number;
+  clienteId: string;
+  data: Date;
+  itens: ItemPedido[];
+  total: number;
+};

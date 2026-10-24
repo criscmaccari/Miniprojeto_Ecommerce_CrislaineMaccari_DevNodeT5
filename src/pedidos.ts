@@ -1,5 +1,5 @@
 
-import type { Pedido } from "./type";
+import type { Pedido, ItemPedido } from "./type";
 import { buscarCliente } from "./clientes";
 import { buscarProduto } from "./produtos";
 
@@ -28,19 +28,26 @@ export function finalizarPedido(
     return undefined;
   }
 
-  const itens = obterItensCarrinho();
+  const itensCarrinho = obterItensCarrinho();
 
-  if (itens.length === 0) {
+  if (itensCarrinho.length === 0) {
     console.log("O carrinho está vazio.");
     return undefined;
   }
 
-  // Verificar se existe produto e se há estoque
-  for (const item of itens) {
+  const itensPedido: ItemPedido[] = [];
+
+  // Validar todos os itens antes de alterar o estoque
+  for (const item of itensCarrinho) {
     const produto = buscarProduto(item.produtoId);
 
     if (produto === undefined) {
       console.log("Produto não encontrado.");
+      return undefined;
+    }
+
+    if (item.quantidade <= 0) {
+      console.log("A quantidade deve ser maior que zero.");
       return undefined;
     }
 
@@ -50,6 +57,13 @@ export function finalizarPedido(
       );
       return undefined;
     }
+
+    // Guardar o preço praticado no momento da compra
+    itensPedido.push({
+      produtoId: item.produtoId,
+      quantidade: item.quantidade,
+      precoUnitario: produto.preco
+    });
   }
 
   // Criar pedido
@@ -57,12 +71,12 @@ export function finalizarPedido(
     pedidoId: proximoPedidoId,
     clienteId: clienteId,
     data: new Date(),
-    itens: itens,
+    itens: itensPedido,
     total: calcularTotal()
   };
 
-  // Atualizar estoque
-  for (const item of itens) {
+  // Atualizar estoque após validar todos os itens
+  for (const item of itensPedido) {
     const produto = buscarProduto(item.produtoId);
 
     if (produto !== undefined) {
@@ -70,11 +84,9 @@ export function finalizarPedido(
     }
   }
 
-  // Guardar pedido e avançar o ID
   pedidos.push(pedido);
   proximoPedidoId++;
 
-  // Limpar carrinho após finalizar
   limparCarrinho();
 
   console.log("Pedido finalizado com sucesso!");
@@ -92,8 +104,7 @@ export function buscarPedido(
   );
 }
 
-// Listar pedidos
-
+// Listar todos os pedidos
 export function listarPedidos(): void {
   for (const pedido of pedidos) {
     console.log(
@@ -104,6 +115,40 @@ export function listarPedidos(): void {
       })} | ` +
       `Total: ${formatarMoeda(pedido.total)}`
     );
+
+    for (const item of pedido.itens) {
+      const produto = buscarProduto(item.produtoId);
+      const nomeProduto = produto === undefined
+        ? item.produtoId
+        : produto.nome;
+
+      console.log(
+        `  ${nomeProduto} | ` +
+        `Quantidade: ${item.quantidade} | ` +
+        `Preço unitário na compra: ${formatarMoeda(item.precoUnitario)}`
+      );
+    }
   }
 }
 
+// Listar pedidos de um cliente específico
+export function listarPedidosPorCliente(
+  clienteId: string
+): Pedido[] {
+  const cliente = buscarCliente(clienteId);
+
+  if (cliente === undefined) {
+    console.log("Cliente não encontrado.");
+    return [];
+  }
+
+  const pedidosCliente = pedidos.filter(
+    pedido => pedido.clienteId === clienteId
+  );
+
+  if (pedidosCliente.length === 0) {
+    console.log("Esse cliente ainda não possui pedidos.");
+  }
+
+  return pedidosCliente;
+}

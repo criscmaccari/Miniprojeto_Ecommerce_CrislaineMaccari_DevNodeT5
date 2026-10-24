@@ -131,19 +131,28 @@ export function removerProduto(produtoId: string): boolean {
 export function atualizarProduto(
   produtoId: string,
   nome?: string,
-  categoria?: "alimentos" | "vestuario",
+  categoria?: Categoria,
   preco?: number,
-  estoque?: number,
+  estoque?: number
 ): boolean {
+
   const produto = buscarProduto(produtoId);
+
   if (produto === undefined) {
     console.log("Produto não encontrado.");
     return false;
   }
-  if (produto.nome.length === 0 || produto.nome === " ") {
+
+  if (nome !== undefined && nome.length === 0) {
     console.log("O nome não pode estar vazio.");
     return false;
   }
+
+  if (nome !== undefined && nome === " ") {
+    console.log("O nome não pode estar vazio.");
+    return false;
+  }
+
   if (preco !== undefined && preco <= 0) {
     console.log("O preço deve ser maior que zero.");
     return false;
@@ -153,6 +162,7 @@ export function atualizarProduto(
     console.log("O estoque não pode ser negativo.");
     return false;
   }
+
   if (nome !== undefined) {
     produto.nome = nome;
   }
